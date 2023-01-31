@@ -20,3 +20,8 @@ $router->get('/', function () use ($router) {
 $router->get('/key', function() {
     return \Illuminate\Support\Str::random(32);
 });
+
+$router->group(['prefix' => 'auth'], function () use ($router) {
+    $router->post('/login', 'AuthController@login');
+    $router->post('/register', 'AuthController@login');
+});
