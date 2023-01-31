@@ -1,13 +1,11 @@
 <?php
 
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 class CreateBooksTable extends Migration
 {
-    use SoftDeletes;
     /**
      * Run the migrations.
      *
@@ -21,6 +19,7 @@ class CreateBooksTable extends Migration
             $table->string('author');
             $table->string('publisher');
             $table->year('release_year');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
