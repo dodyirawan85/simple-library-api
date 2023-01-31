@@ -17,7 +17,7 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->get('/key', function() {
+$router->get('/key', function () {
     return \Illuminate\Support\Str::random(32);
 });
 
@@ -29,4 +29,12 @@ $router->group(['prefix' => 'auth'], function () use ($router) {
 
 $router->group(['middleware' => 'auth'], function ($router) {
     // * put all endpoint that need authentication here
+});
+
+$router->group(['prefix' => 'category'], function ($router) {
+    $router->get('/', 'CategoryController@index');
+    $router->post('/', 'CategoryController@store');
+    $router->get('/{id}', 'CategoryController@show');
+    $router->put('/{id}', 'CategoryController@update');
+    $router->delete('/{id}', 'CategoryController@destroy');
 });
