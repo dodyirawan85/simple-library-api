@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Client\Request;
-
 use App\Models\Category;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
@@ -17,31 +17,26 @@ class CategoryController extends Controller
      */
     public function __construct()
     {
-        //
     }
 
     /**
-     * * Get All Categories
+     * Get All Categories
      */
-    public function index(Request $request)
+    public function index()
     {
         $categories = Category::all();
 
-        $response = [
-            'message' => 'Get categories success',
-            'status_code' => Response::HTTP_OK,
-            'data' => $categories
-        ];
+        $response = compile_response('Success', Response::HTTP_OK, $categories);
 
-        return response()->json($response, Response::HTTP_OK);
+        return response()->json($response, $response['status_code']);
     }
 
     /**
-     * * Create Category
+     * Create Category
      */
-    public function store(Request $request)
+    public function store()
     {
-        $input = $request->all();
+        $input = request()->all();
 
         $validator = Validator::make($input, [
             'name' => 'required|string'
@@ -54,45 +49,100 @@ class CategoryController extends Controller
         $category = Category::create($input);
 
         if ($category) {
-            $response = [
-                'message' => 'Create category success',
-                'status_code' => Response::HTTP_CREATED,
-                'data' => $category
-            ];
-
-            return response()->json($response, Response::HTTP_OK);
+            $message = "Success";
+            $status_code = Response::HTTP_CREATED;
+        } else {
+            $message = "Failed";
+            $status_code = Response::HTTP_INTERNAL_SERVER_ERROR;
         }
 
-        $response = [
-            'message' => 'Create category failed ',
-            'status_code' => Response::HTTP_INTERNAL_SERVER_ERROR
-        ];
+        $response = compile_response($message, $status_code, $category);
 
-        return response()->json($response, Response::HTTP_INTERNAL_SERVER_ERROR);
+        return response()->json($response, $response['status_code']);
     }
 
     /**
-     * * Show Category
+     * Show Category
      */
-    public function show(Request $request, $id)
+    public function show($id)
     {
         $category = Category::find($id);
 
         if ($category) {
-            $response = [
-                'message' => 'Get category success',
-                'status_code' => Response::HTTP_OK,
-                'data' => $category
-            ];
-
-            return response()->json($response, Response::HTTP_OK);
+            $message = "Success";
+            $status_code = Response::HTTP_OK;
+        } else {
+            $message = "Not Found";
+            $status_code = Response::HTTP_NOT_FOUND;
         }
 
-        $response = [
-            'message' => 'Category not found',
-            'status_code' => Response::HTTP_NOT_FOUND
-        ];
+        $response = compile_response($message, $status_code, $category);
 
-        return response()->json($response, Response::HTTP_NOT_FOUND);
+        return response()->json($response, $response['status_code']);
+    }
+
+    /**
+     * Update Category
+     */
+    public function update(Request $request, $id)
+    {
+        $input = $request->all();
+        $category = Category::find($id);
+
+        $validator = Validator::make($input, [
+            'name' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        if (!$category) {
+            $message = "Category Not Found !";
+            $status_code = Response::HTTP_NOT_FOUND;
+        } else {
+            DB::beginTransaction();
+            try {
+                $category->fill($input);
+                $category->save();
+                DB::commit();
+                $message = "Update Category Success !";
+                $status_code = Response::HTTP_OK;
+            } catch (\Throwable $th) {
+                DB::rollBack();
+                $message = "Update Category Failed !";
+                $status_code = Response::HTTP_INTERNAL_SERVER_ERROR;
+            }
+        }
+
+        $response = compile_response($message, $status_code, $category);
+
+        return response()->json($response, $response['status_code']);
+    }
+
+    public function destroy($id)
+    {
+        $category = Category::find($id);
+
+        if ($category) {
+            DB::beginTransaction();
+            try {
+                $category->delete();
+                DB::commit();
+                $message = "Category deleted successfully !";
+                $status_code = Response::HTTP_OK;
+            } catch (\Throwable $th) {
+                DB::rollBack();
+                $message = "Failed to delete category !";
+                $status_code = Response::HTTP_INTERNAL_SERVER_ERROR;
+            }
+        } else {
+            $message = "Category Not Found !";
+            $status_code = Response::HTTP_NOT_FOUND;
+        }
+
+        $response = compile_response($message, $status_code, $category);
+
+        return response()->json($response, $response['status_code']);
     }
 }
