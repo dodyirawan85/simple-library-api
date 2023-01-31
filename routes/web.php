@@ -23,5 +23,10 @@ $router->get('/key', function() {
 
 $router->group(['prefix' => 'auth'], function () use ($router) {
     $router->post('/login', 'AuthController@login');
-    $router->post('/register', 'AuthController@login');
+    $router->post('/register', 'AuthController@register');
+    $router->get('/users', ['middleware' => 'auth', 'uses' => 'AuthController@user']);
+});
+
+$router->group(['middleware' => 'auth'], function ($router) {
+    // * put all endpoint that need authentication here
 });

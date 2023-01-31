@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
                 'address' => 'Example Address No 1',
                 'phone' => '628xxxx',
                 'email' => 'admin@simpleapi.com',
-                'password' => Crypt::encryptString('admin123'),
+                'password' => app('hash')->make('admin123'),
                 'role' => 'admin',
                 'created_at' => date('Y-m-d H:i:s')
             ],
@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
                 'address' => 'Example Address No 2',
                 'phone' => '628xxxx',
                 'email' => 'librarian@simpleapi.com',
-                'password' => Crypt::encryptString('librarian123'),
+                'password' => app('hash')->make('librarian123'),
                 'role' => 'librarian',
                 'created_at' => date('Y-m-d H:i:s')
             ],
@@ -42,7 +42,7 @@ class UserSeeder extends Seeder
                 'address' => 'Example Address No 3',
                 'phone' => '628xxxx',
                 'email' => 'member@simpleapi.com',
-                'password' => Crypt::encryptString('member123'),
+                'password' => app('hash')->make('member123'),
                 'role' => 'member',
                 'created_at' => date('Y-m-d H:i:s')
             ]
