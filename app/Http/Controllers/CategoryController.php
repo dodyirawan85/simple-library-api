@@ -36,6 +36,10 @@ class CategoryController extends Controller
      */
     public function store()
     {
+        $res = validate_role(['admin', 'librarian']);
+        if ($res)
+            return $res;
+
         $input = request()->all();
 
         $validator = Validator::make($input, [
@@ -86,6 +90,10 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $res = validate_role(['admin', 'librarian']);
+        if ($res)
+            return $res;
+
         $input = $request->all();
         $category = Category::find($id);
 
@@ -122,6 +130,10 @@ class CategoryController extends Controller
 
     public function destroy($id)
     {
+        $res = validate_role(['admin', 'librarian']);
+        if ($res)
+            return $res;
+
         $category = Category::find($id);
 
         if ($category) {
