@@ -15,4 +15,12 @@ class Book extends Model
         'release_year',
         'title'
     ];
+
+    /**
+     * * Categories that belongs to Books
+     */
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class);
+    }
 }
