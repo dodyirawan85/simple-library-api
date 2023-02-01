@@ -36,6 +36,7 @@ class AuthController extends Controller
             'phone' => 'required|string|min:7|max:15',
             'email' => 'required|unique:users',
             'password' => 'required|confirmed',
+            'role' => 'required|string'
         ];
 
         $validator = Validator::make($input, $rules);
@@ -43,7 +44,7 @@ class AuthController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-
+        
         $plainPass = $input['password'];
 
         $user = User::create([
@@ -52,8 +53,8 @@ class AuthController extends Controller
             'address' => $input['address'],
             'phone' => $input['phone'],
             'email' => $input['email'],
-            'password' => app('hash')->make($plainPass)
-            // 'password' => Crypt::encryptString($plainPass)
+            'password' => app('hash')->make($plainPass),
+            'role' => $input['role']
         ]);
 
         if ($user) {
