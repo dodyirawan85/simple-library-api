@@ -10,4 +10,12 @@ class Category extends Model
     use SoftDeletes;
     protected $table = "categories";
     protected $fillable = ['name'];
+
+    /**
+     * * Books that belongs to Category
+     */
+    public function books()
+    {
+        return $this->belongsToMany(Book::class);
+    }
 }
