@@ -35,5 +35,17 @@ class AuthServiceProvider extends ServiceProvider
                 return User::where('api_token', $request->input('api_token'))->first();
             }
         });
+
+        Gate::define('admin', function (User $user) {
+            return $user->role == 'admin';
+        });
+
+        Gate::define('librarian', function (User $user) {
+            return $user->role == 'librarian';
+        });
+
+        Gate::define('member', function (User $user) {
+            return $user->role == 'member';
+        });
     }
 }
