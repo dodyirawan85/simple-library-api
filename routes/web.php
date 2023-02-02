@@ -44,4 +44,11 @@ $router->group(['middleware' => 'auth'], function ($router) {
         $router->put('/{id}', 'BookController@update');
         $router->delete('/{id}', 'BookController@destroy');
     });
+
+    $router->group(['prefix' => 'transaction'], function ($router) {
+        $router->get('/', 'TransactionController@index');
+        $router->post('/', 'TransactionController@store');
+        $router->get('/{id}', 'TransactionController@show');
+        $router->put('/return/{id}', 'TransactionController@update');
+    });
 });
