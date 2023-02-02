@@ -36,6 +36,10 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
+        $res = validate_role(['admin', 'librarian']);
+        if ($res)
+            return $res;
+
         $input = $request->all();
 
         $rules = [
@@ -102,6 +106,10 @@ class BookController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $res = validate_role(['admin', 'librarian']);
+        if ($res)
+            return $res;
+
         $book = Book::with('categories:id,name')->find($id);
 
         if (!$book) {
@@ -156,6 +164,10 @@ class BookController extends Controller
      */
     public function destroy($id)
     {
+        $res = validate_role(['admin', 'librarian']);
+        if ($res)
+            return $res;
+
         $book = Book::with('categories:id,name')->find($id);
 
         if (!$book) {

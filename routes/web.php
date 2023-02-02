@@ -36,12 +36,12 @@ $router->group(['middleware' => 'auth'], function ($router) {
         $router->put('/{id}', 'CategoryController@update');
         $router->delete('/{id}', 'CategoryController@destroy');
     });
-});
 
-$router->group(['prefix' => 'books'], function ($router) {
-    $router->get('/', 'BookController@index');
-    $router->post('/', 'BookController@store');
-    $router->get('/{id}', 'BookController@show');
-    $router->put('/{id}', 'BookController@update');
-    $router->delete('/{id}', 'BookController@destroy');
+    $router->group(['prefix' => 'books'], function ($router) {
+        $router->get('/', 'BookController@index');
+        $router->post('/', 'BookController@store');
+        $router->get('/{id}', 'BookController@show');
+        $router->put('/{id}', 'BookController@update');
+        $router->delete('/{id}', 'BookController@destroy');
+    });
 });
