@@ -6,7 +6,6 @@ use App\Models\Book;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class BookController extends Controller
@@ -18,7 +17,6 @@ class BookController extends Controller
      */
     public function __construct()
     {
-        //
     }
 
     /**
@@ -62,30 +60,18 @@ class BookController extends Controller
         $book->release_year = $input['release_year'];
 
         if ($book->save()) {
-            $pivotData = [];
+            $book->categories()->sync($input['categories']);
+            $book->categories->makeHidden('pivot');
 
-            foreach ($input['categories'] as $key => $value) {
-                $row = [
-                    'book_id' => $book->id,
-                    'category_id' => $value
-                ];
-
-                array_push($pivotData, $row);
-            }
-
-            $book->categories()->attach($pivotData);
-
-            foreach ($book->categories as $category) {
-                # code...
-                $category->pivot;
-            }
-
-            $response = compile_response('Create Book Success', Response::HTTP_CREATED, $book);
-
-            return response()->json($response, $response['status_code']);
+            $msg = 'Create Book Success !';
+            $status_code = Response::HTTP_CREATED;
+        } else {
+            $msg = 'Create Book Failed !';
+            $status_code = Response::HTTP_INTERNAL_SERVER_ERROR;;
+            $book = null;
         }
 
-        $response = compile_response('Create Book Failed', Response::HTTP_INTERNAL_SERVER_ERROR);
+        $response = compile_response($msg, $status_code, $book);
 
         return response()->json($response, $response['status_code']);
     }
@@ -93,17 +79,20 @@ class BookController extends Controller
     /**
      * * Get Book
      */
-    public function show (Request $request, $id)
+    public function show($id)
     {
         $book = Book::with('categories:id,name')->find($id);
 
         if ($book) {
-            $response = compile_response('Get Book Success', Response::HTTP_OK, $book);
-
-            return response()->json($response, $response['status_code']);
+            $msg = 'Get Book Success !';
+            $status_code = Response::HTTP_OK;
+        } else {
+            $msg = 'Book Not Found !';
+            $status_code = Response::HTTP_NOT_FOUND;
+            $book = null;
         }
 
-        $response = compile_response('Book Not Found', Response::HTTP_NOT_FOUND);
+        $response = compile_response($msg, $status_code, $book);
 
         return response()->json($response, $response['status_code']);
     }
@@ -143,42 +132,21 @@ class BookController extends Controller
         $book->publisher = $input['publisher'];
         $book->release_year = $input['release_year'];
 
-        $bookCat = [];
-        foreach ($book->categories as $category) {
-            $bookCat = array_merge($bookCat, [$category->id]);
-        }
-
-        // dd($bookCat);
-
-        $removedCat = array_filter($bookCat, function($cat) use ($input) {
-            return !in_array($cat, $input['categories']);
-        });
-
-        if ($removedCat && count($removedCat)) {
-            $book->categories()->detach($removedCat);
-
-            $addedCat = array_filter($input['categories'], function($cat) use ($removedCat, $bookCat) {
-                return !in_array($cat, $removedCat) && !in_array($cat, $bookCat);
-            });
-
-            $book->categories()->attach($addedCat);
-        } else {
-            $addedCat = array_filter($input['categories'], function($cat) use ($bookCat) {
-                return !in_array(intval($cat), $bookCat);
-            });
-
-            $book->categories()->attach($addedCat);
-        }
+        $book->categories()->sync($input['categories']);
 
         if ($book->save()) {
             $book->refresh();
+            $book->categories->makeHidden('pivot');
 
-            $response = compile_response('Update Book Success', Response::HTTP_OK, $book);
-
-            return response()->json($response, $response['status_code']);
+            $msg = 'Update Book Success !';
+            $status_code = Response::HTTP_OK;
+        } else {
+            $msg = 'Update Book Failed !';
+            $status_code = Response::HTTP_INTERNAL_SERVER_ERROR;
+            $book = null;
         }
 
-        $response = compile_response('Update Book Failed', Response::HTTP_INTERNAL_SERVER_ERROR);
+        $response = compile_response($msg, $status_code, $book);
 
         return response()->json($response, $response['status_code']);
     }
@@ -191,20 +159,20 @@ class BookController extends Controller
         $book = Book::with('categories:id,name')->find($id);
 
         if (!$book) {
-            $response = compile_response('Book Not Found', Response::HTTP_NOT_FOUND);
+            $msg = 'Book Not Found !';
+            $status_code = Response::HTTP_NOT_FOUND;
+        } else {
+            $book->categories()->detach();
 
-            return response()->json($response, $response['status_code']);
+            if ($book->delete()) {
+                $msg = 'Delete Book Success !';
+                $status_code = Response::HTTP_OK;
+            } else {
+                $msg = 'Delete Book Failed';
+                $status_code = Response::HTTP_INTERNAL_SERVER_ERROR;
+            }
         }
-
-        $book->categories()->detach();
-
-        if ($book->delete()) {
-            $response = compile_response('Delete Book Success', Response::HTTP_OK);
-
-            return response()->json($response, $response['status_code']);
-        }
-
-        $response = compile_response('Delete Book Failed', Response::HTTP_INTERNAL_SERVER_ERROR);
+        $response = compile_response($msg, $status_code);
 
         return response()->json($response, $response['status_code']);
     }
